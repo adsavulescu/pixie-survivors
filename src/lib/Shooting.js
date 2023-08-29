@@ -7,7 +7,7 @@ export default class Shooting {
         this.level = level;
         this.player = player;
         this.allowedDimensions = allowedDimensions;
-        this.bulletSpeed = 4;
+        this.bulletSpeed = 30;
         this.bullets = [];
         this.bulletRadius = 8;
         this.maxBullets = 3;

@@ -9,7 +9,7 @@ export function bulletHitTest({bullets, zombies, bulletRadius, zombieRadius}) {
 
             if (distance < bulletRadius + zombieRadius) {
                 zombies.splice(index, 1);
-                zombie.kill();
+                zombie.killed();
             }
         })
     })

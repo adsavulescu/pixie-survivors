@@ -15,8 +15,8 @@ export default class GameScreen {
     onStart(container) {
 
         this.allowedDimensions = {
-            width:window.innerWidth / 2,
-            height: window.innerHeight / 2
+            width:window.innerWidth,
+            height: window.innerHeight
         }
 
         //top bar
@@ -105,7 +105,7 @@ export default class GameScreen {
         container.addChild(this.gameArea);
 
         this.player = new Player(this.app, this.gameArea, this.allowedDimensions);
-        // this.zSpawner = new Spawner({ create: () => new Zombie(this.app, this.gameArea, this.player, this.allowedDimensions)});
+        this.zSpawner = new Spawner({ create: () => new Zombie(this.app, this.gameArea, this.player, this.allowedDimensions)});
 
     }
 
@@ -113,21 +113,21 @@ export default class GameScreen {
     onUpdate(delta) {
         this.player.update(delta);
 
-        // this.zSpawner.spawns.forEach((zombie) => zombie.update(delta));
+        this.zSpawner.spawns.forEach((zombie) => zombie.update(delta));
 
-        // bulletHitTest({
-        //     bullets:this.player.shooting.bullets,
-        //     zombies: this.zSpawner.spawns,
-        //     bulletRadius: 8,
-        //     zombieRadius: 16
-        // });
-        //
-        // bulletHitTest({
-        //     bullets:this.player.slashing.bullets,
-        //     zombies: this.zSpawner.spawns,
-        //     bulletRadius: 8,
-        //     zombieRadius: 16
-        // });
+        bulletHitTest({
+            bullets:this.player.shooting.bullets,
+            zombies: this.zSpawner.spawns,
+            bulletRadius: 8,
+            zombieRadius: 16
+        });
+
+        bulletHitTest({
+            bullets:this.player.slashing.bullets,
+            zombies: this.zSpawner.spawns,
+            bulletRadius: 8,
+            zombieRadius: 16
+        });
 
         this.gameArea.pivot.x = this.player.position.x + 26;
         this.gameArea.pivot.y = this.player.position.y + 37;
@@ -135,7 +135,7 @@ export default class GameScreen {
         this.gameArea.position.y = window.innerHeight / 2;
 
 
-        // this.enemiesText.text = `Enemies: ${this.zSpawner.spawns.length}`;
+        this.enemiesText.text = `Enemies: ${this.zSpawner.spawns.length}`;
 
         this.timeText.text = `Time: ${this.seconds}`;
 
@@ -154,7 +154,9 @@ export default class GameScreen {
         this.healthBar.width = (this.player.health / this.player.maxHealth) * this.healthBar.initialWidth;
 
         if (this.player.dead) {
-            this.coordinator.gotoScene(new EndScreen(this.coordinator));
+            setTimeout(() => {
+                this.coordinator.gotoScene(new EndScreen(this.coordinator));
+            }, 2000)
         }
 
     }

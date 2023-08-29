@@ -21,6 +21,7 @@ class Character {
         this.player.width = playerWidth;
         this.player.height = playerHeight;
         this.player.speed = 5;
+        this.runSpeed = 3;
         this.controls = new Controls();
 
         this.level.addChild(this.player);
@@ -35,30 +36,32 @@ class Character {
         this.player.kills = 0;
 
 
-        this.walkAnim = null;
-        this.idleAnim = null;
+        this.animations = {};
 
         this.animator = new Animator();
-        this.animator.loadAssets('../assets/wizard.json').then(r => {
-            this.animator.createAnimation('idle', '6', 0.1);
-            this.animator.createAnimation('jump', '11', 0.2);
-            this.animator.createAnimation('walk', '7', 0.2);
-            this.animator.createAnimation('run', '8', 0.2);
-            this.animator.createAnimation('attack', '10', 0.2);
-            this.animator.createAnimation('dead', '5', 0.1);
-            this.animator.createAnimation('hurt', '4', 0.1);
 
 
-            this.player.addChild(this.animator.parseAnimation('idle'));
-            this.player.addChild(this.animator.parseAnimation('jump'));
-            this.player.addChild(this.animator.parseAnimation('walk'));
-            this.player.addChild(this.animator.parseAnimation('run'));
-            this.player.addChild(this.animator.parseAnimation('attack'));
-            this.player.addChild(this.animator.parseAnimation('dead'));
-            this.player.addChild(this.animator.parseAnimation('hurt'));
+        PIXI.Assets.load('../assets/wizard.json').then(sheet => {
 
-            this.animator.playAnimation('idle');
+            this.animations['idle'] = this.animator.createAnimation('idle', 0.1, sheet);
+            this.animations['jump'] = this.animator.createAnimation('jump',0.2, sheet);
+            this.animations['walk'] = this.animator.createAnimation('walk',0.2, sheet);
+            this.animations['run'] = this.animator.createAnimation('run',0.2, sheet);
+            this.animations['attack'] = this.animator.createAnimation('attack',0.2, sheet);
+            this.animations['dead'] = this.animator.createAnimation('dead',0.1, sheet);
+            this.animations['hurt'] = this.animator.createAnimation('hurt',0.1, sheet);
+
+            this.player.addChild(this.animations['idle']);
+            this.player.addChild(this.animations['jump']);
+            this.player.addChild(this.animations['walk']);
+            this.player.addChild(this.animations['run']);
+            this.player.addChild(this.animations['attack']);
+            this.player.addChild(this.animations['dead']);
+            this.player.addChild(this.animations['hurt']);
+
+            // this.animator.play(this.animations['idle']);
         });
+
     }
 
     get kills() {
@@ -94,17 +97,17 @@ class Character {
         return this.player.height;
     }
 
-    attacked() {
-        this.player.health -= 1;
+    get direction() {
+        return this.player.direction;
+    }
 
-        // this.animator.pauseCurrent();
-        // this.animator.playAnimation('hurt', false, () => {
-        //     setTimeout(() => {
-        //         this.animator.stopAnimation('hurt');
-        //         this.animator.resumeCurrent();
-        //         console.log('???');
-        //     }, 500);
-        // });
+    get moving() {
+        return this.player.moving;
+    }
+
+    attacked() {
+        console.log('player attacked');
+        this.player.health -= 1;
 
         if(this.player.health <= 0) {
             this.dead = true;
@@ -113,7 +116,16 @@ class Character {
 
     move(delta) {
         const keys = this.controls.getInput();
-        const velocity = this.player.speed * delta;
+        // console.log(keys);
+
+        let velocity = this.player.speed * delta;
+
+        if (keys.shift) {
+            velocity = this.player.speed + this.runSpeed * delta;
+            this.player.running = true;
+        } else {
+            this.player.running = false;
+        }
 
         this.player.prevPosition = this.player.position.clone();
 
@@ -129,76 +141,77 @@ class Character {
         if (keys.d && (this.player.position.x + this.player.width / 2) < this.allowedDimensions.width) {
             this.player.position.x += velocity;
         }
-    }
 
-    updateAnimations(delta){
+        //determine moving state and direction
         if (this.player.position.x !== this.player.prevPosition.x || this.player.position.y !== this.player.prevPosition.y) {
 
-            this.animator.stopAnimation('idle');
-
+            this.player.moving = true;
 
             if (this.player.position.x > this.player.prevPosition.x) {
-                this.animator.playAnimation('walk', {
-                    scale: {
-                        x: 1
-                    }
-                });
+                this.player.direction = 'right';
             }
 
             if (this.player.position.x < this.player.prevPosition.x) {
-                this.animator.playAnimation('walk', {
+                this.player.direction = 'left';
+            }
+
+            if (this.player.position.y > this.player.prevPosition.y) {
+                this.player.direction = 'bottom';
+            }
+
+            if (this.player.position.y < this.player.prevPosition.y) {
+                this.player.direction = 'top';
+            }
+        } else {
+            this.player.moving = false;
+        }
+    }
+
+    updateAnimations() {
+
+        if (this.player.health <= 0) {
+            this.animator.play(this.animations['dead']);
+        } else if (this.player.running && this.player.moving) {
+            if (this.player.direction === 'left') {
+                this.animator.play(this.animations['run'], {
                     scale: {
                         x: -1
                     }
                 });
+            } else if (this.player.direction === 'right') {
+                this.animator.play(this.animations['run'], {
+                    scale: {
+                        x: 1
+                    }
+                });
+            } else if (this.player.direction === 'top' || this.player.direction === 'bottom') {
+                this.animator.play(this.animations['run']);
             }
-
-            if (this.player.position.y > this.player.prevPosition.y) {
-                this.animator.playAnimation('walk');
+        } else if (this.player.moving) {
+            if (this.player.direction === 'left') {
+                this.animator.play(this.animations['walk'], {
+                    scale: {
+                        x: -1
+                    }
+                });
+            } else if (this.player.direction === 'right') {
+                this.animator.play(this.animations['walk'], {
+                    scale: {
+                        x: 1
+                    }
+                });
+            } else if (this.player.direction === 'top' || this.player.direction === 'bottom') {
+                this.animator.play(this.animations['walk']);
             }
-
-            if (this.player.position.y < this.player.prevPosition.y) {
-                this.animator.playAnimation('walk');
-            }
-
         } else {
-            this.animator.stopAnimation('walk');
-            this.animator.playAnimation('idle');
+            this.animator.play(this.animations['idle']);
         }
-    }
-    getDirection() {
-        let playerStatus = {
-            moving:false,
-            direction:null,
-        }
-        if (this.player.position.x !== this.player.prevPosition.x || this.player.position.y !== this.player.prevPosition.y) {
-
-            playerStatus.moving = true;
-
-            if (this.player.position.x > this.player.prevPosition.x) {
-                playerStatus.direction = 'right';
-            }
-
-            if (this.player.position.x < this.player.prevPosition.x) {
-                playerStatus.direction = 'left';
-            }
-
-            if (this.player.position.y > this.player.prevPosition.y) {
-                playerStatus.direction = 'bottom';
-            }
-
-            if (this.player.position.y < this.player.prevPosition.y) {
-                playerStatus.direction = 'top';
-            }
-        }
-
-        return playerStatus;
     }
     update(delta) {
 
-        this.move(delta);
-
-        this.updateAnimations(delta);
+        if (!this.dead) {
+            this.move(delta);
+        }
 
         const mouse = this.app.renderer.plugins.interaction.pointer;
         // const cusorPosition = mouse.global;
@@ -226,6 +239,13 @@ class Character {
             this.lastKeyButton = keys.space;
         }
         this.slashing.update(delta);
+
+
+
+
+
+        this.updateAnimations(delta);
+
     }
 }
 

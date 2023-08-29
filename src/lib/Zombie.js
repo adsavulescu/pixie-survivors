@@ -63,6 +63,9 @@ export default class Zombie {
         if (e.distance(s) < this.player.width / 2) {
             this.attackPlayer();
             return;
+        } else {
+            this.attacking = false;
+            clearInterval(this.interval);
         }
 
         let d = s.subtract(e);
@@ -70,7 +73,7 @@ export default class Zombie {
         this.zombie.position.set(this.zombie.position.x + v.x, this.zombie.position.y + v.y);
     }
 
-    kill() {
+    killed() {
         this.level.removeChild(this.zombie);
         clearInterval(this.interval);
         this.player.kills++;

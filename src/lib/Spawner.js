@@ -2,7 +2,7 @@ export default class Spawner {
     constructor({create}) {
         const spawnInterval = 1000; //in ms
 
-        this.maxSpawns = 30;
+        this.maxSpawns = 1;
 
         this.create = create;
 

@@ -14,29 +14,22 @@ export default class Slashing {
         this.bulletVelocity = 0.1;
 
 
-        // this.direction = null;
-
         this.theta = 0;
 
     }
 
     fire() {
-        if (this.player.getDirection().moving) {
-
-            if (this.bullets.length < this.maxBullets) {
-                for (let i = 0; i < this.maxBullets; i++) {
-                    this.theta = 0;
-                    const dot = new PIXI.Graphics();
-                    dot.beginFill(0X0000ff);
-                    dot.drawCircle(0, 0, this.bulletRadius);
-                    dot.endFill();
-                    this.bullets.push(dot);
-                    this.level.addChild(dot);
-                }
+        if (this.bullets.length < this.maxBullets) {
+            for (let i = 0; i < this.maxBullets; i++) {
+                this.theta = 0;
+                const dot = new PIXI.Graphics();
+                dot.beginFill(0X0000ff);
+                dot.drawCircle(0, 0, this.bulletRadius);
+                dot.endFill();
+                this.bullets.push(dot);
+                this.level.addChild(dot);
             }
-
         }
-
     }
 
     set slash(shooting) {
@@ -54,33 +47,36 @@ export default class Slashing {
 
 
         this.bullets.forEach((bullet, bulletIndex) => {
-            this.direction = this.player.getDirection().direction;
 
             const distance = (bulletIndex + this.bulletVelocity) * (this.circleRadius / this.maxBullets);
             let x, y = 0;
 
             // Right
-            if (this.direction === 'right') {
+            if (this.player.direction === 'right') {
                 x = this.player.position.x + distance * Math.sin(this.theta);
                 y = this.player.position.y - distance * Math.cos(this.theta);
             }
-
+            else
             // Top
-            if (this.direction === 'top') {
+            if (this.player.direction === 'top') {
                 x = this.player.position.x - distance * Math.cos(this.theta);
                 y = this.player.position.y - distance * Math.sin(this.theta);
             }
-
+            else
             // Bottom
-            if (this.direction === 'bottom') {
+            if (this.player.direction === 'bottom') {
                 x = this.player.position.x + distance * Math.cos(this.theta);
                 y = this.player.position.y + distance * Math.sin(this.theta);
             }
-
+            else
             // Left
-            if (this.direction === 'left') {
+            if (this.player.direction === 'left') {
                 x = this.player.position.x - distance * Math.sin(this.theta);
                 y = this.player.position.y + distance * Math.cos(this.theta);
+            }
+            else {
+                x = this.player.position.x + distance * Math.sin(this.theta);
+                y = this.player.position.y - distance * Math.cos(this.theta);
             }
             bullet.position.set(x, y);
         });
