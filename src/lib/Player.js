@@ -10,18 +10,30 @@ class Character {
         this.level = level;
         this.allowedDimensions = allowedDimensions;
 
-        const playerWidth = 26;
-        const playerHeight = 32;
+        // const playerWidth = 52;
+        // const playerHeight = 64;
+
 
         this.player = new PIXI.Container();
+        this.player.radius = 30;
+        this.player.zIndex = 2;
+
+        this.circle = new PIXI.Graphics();
+
+        this.circle.lineStyle(0); // draw a circle, set the lineStyle to zero so the circle doesn't have an outline
+        this.circle.beginFill(0xfff00, 1);
+        this.circle.drawCircle(0, 0, this.player.radius);
+        this.circle.endFill();
+
+        this.player.addChild(this.circle);
         // this.player.anchor.set(0.5);
 
         this.player.position.set(level.width / 2, allowedDimensions.height / 2);
         this.player.prevPosition = { x: this.player.position.x, y: this.player.position.y };
-        this.player.width = playerWidth;
-        this.player.height = playerHeight;
-        this.player.speed = 5;
-        this.runSpeed = 3;
+        // this.player.width = playerWidth;
+        // this.player.height = playerHeight;
+        this.player.speed = 3;
+        this.player.runSpeed = 1;
         this.controls = new Controls();
 
         this.level.addChild(this.player);
@@ -41,25 +53,27 @@ class Character {
         this.animator = new Animator();
 
 
-        PIXI.Assets.load('../assets/wizard.json').then(sheet => {
+        PIXI.Assets.load('../assets/archer.json').then(sheet => {
 
             this.animations['idle'] = this.animator.createAnimation('idle', 0.1, sheet);
             this.animations['jump'] = this.animator.createAnimation('jump',0.2, sheet);
             this.animations['walk'] = this.animator.createAnimation('walk',0.2, sheet);
             this.animations['run'] = this.animator.createAnimation('run',0.2, sheet);
-            this.animations['attack'] = this.animator.createAnimation('attack',0.2, sheet);
+            this.animations['attack'] = this.animator.createAnimation('attack',0.15, sheet);
+            this.animations['shot'] = this.animator.createAnimation('shot',0.4, sheet);
+            this.animations['shot2'] = this.animator.createAnimation('shot2',0.4, sheet);
             this.animations['dead'] = this.animator.createAnimation('dead',0.1, sheet);
-            this.animations['hurt'] = this.animator.createAnimation('hurt',0.1, sheet);
+            this.animations['hurt'] = this.animator.createAnimation('hurt',0.001, sheet);
 
             this.player.addChild(this.animations['idle']);
             this.player.addChild(this.animations['jump']);
             this.player.addChild(this.animations['walk']);
             this.player.addChild(this.animations['run']);
             this.player.addChild(this.animations['attack']);
+            this.player.addChild(this.animations['shot']);
+            this.player.addChild(this.animations['shot2']);
             this.player.addChild(this.animations['dead']);
             this.player.addChild(this.animations['hurt']);
-
-            // this.animator.play(this.animations['idle']);
         });
 
     }
@@ -68,10 +82,21 @@ class Character {
         return this.player.kills;
     }
 
+    get radius() {
+        return this.player.radius;
+    }
+
     set kills(kills) {
         this.player.kills = kills;
     }
 
+    set isSlashing(status) {
+        this.player.isSlashing = status;
+    }
+
+    set isShooting(status) {
+        this.player.isShooting = status;
+    }
 
     get maxHealth() {
         return this.player.maxHealth;
@@ -106,8 +131,8 @@ class Character {
     }
 
     attacked() {
-        console.log('player attacked');
         this.player.health -= 1;
+        this.player.hurt = true;
 
         if(this.player.health <= 0) {
             this.dead = true;
@@ -121,7 +146,7 @@ class Character {
         let velocity = this.player.speed * delta;
 
         if (keys.shift) {
-            velocity = this.player.speed + this.runSpeed * delta;
+            velocity = this.player.speed + this.player.runSpeed * delta;
             this.player.running = true;
         } else {
             this.player.running = false;
@@ -169,7 +194,48 @@ class Character {
 
     updateAnimations() {
 
-        if (this.player.health <= 0) {
+        if(this.player.isShooting){
+
+            if (this.player.direction === 'left') {
+                this.animator.play(this.animations['shoot'], {
+                    scale: {
+                        x: -1
+                    }
+                });
+            } else if (this.player.direction === 'right') {
+                this.animator.play(this.animations['shoot'], {
+                    scale: {
+                        x: 1
+                    }
+                });
+            } else if (this.player.direction === 'top' || this.player.direction === 'bottom') {
+                this.animator.play(this.animations['shoot']);
+            }
+
+        } else if(this.player.isSlashing){
+
+            if (this.player.direction === 'left') {
+                this.animator.play(this.animations['attack'], {
+                    scale: {
+                        x: -1
+                    }
+                });
+            } else if (this.player.direction === 'right') {
+                this.animator.play(this.animations['attack'], {
+                    scale: {
+                        x: 1
+                    }
+                });
+            } else if (this.player.direction === 'top' || this.player.direction === 'bottom') {
+                this.animator.play(this.animations['attack']);
+            }
+
+        } else if (this.player.hurt) {
+            this.animator.play(this.animations['hurt']);
+            setTimeout(() => {
+                this.player.hurt = false;
+            }, 200);
+        } else if (this.player.health <= 0) {
             this.animator.play(this.animations['dead']);
         } else if (this.player.running && this.player.moving) {
             if (this.player.direction === 'left') {

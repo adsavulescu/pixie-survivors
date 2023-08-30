@@ -23,12 +23,13 @@ export default class Slashing {
             for (let i = 0; i < this.maxBullets; i++) {
                 this.theta = 0;
                 const dot = new PIXI.Graphics();
-                dot.beginFill(0X0000ff);
+                dot.beginFill(0Xffffff, 0);
                 dot.drawCircle(0, 0, this.bulletRadius);
                 dot.endFill();
                 this.bullets.push(dot);
                 this.level.addChild(dot);
             }
+            this.player.isSlashing = true;
         }
     }
 
@@ -38,6 +39,7 @@ export default class Slashing {
             this.interval = setInterval(() => this.fire(), 500);
         } else {
             clearInterval(this.interval);
+            this.player.isSlashing = false;
         }
     }
 

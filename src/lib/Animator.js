@@ -15,7 +15,7 @@ export default class Animator {
     }
 
 
-    play(anim, opts = false, cb = false) {
+    play(anim, opts = false, cb) {
         if (anim) {
             // Stop the current animation
             if (this.currentAnimation) {
@@ -32,7 +32,7 @@ export default class Animator {
             }
 
             if (cb) {
-                anim.onComplete = cb;
+                anim.onComplete = cb();
             }
         }
     }
