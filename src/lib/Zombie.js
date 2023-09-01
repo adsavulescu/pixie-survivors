@@ -15,7 +15,7 @@ export default class Zombie {
         let r  = this.randomSpawnPoint();
         this.zombie.position.set(r.x, r.y);
         this.zombie.prevPosition = { x: this.zombie.position.x, y: this.zombie.position.y };
-        this.zombie.beginFill(0xffffff, 1);
+        this.zombie.beginFill(0xffffff, 0);
         this.zombie.drawCircle(0, 0, this.zombie.radius);
         this.zombie.endFill();
         this.level.addChild(this.zombie);

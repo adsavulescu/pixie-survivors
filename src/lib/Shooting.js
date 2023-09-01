@@ -29,7 +29,7 @@ export default class Shooting {
     fire() {
         const bullet = new PIXI.Graphics();
         bullet.position.set(this.player.position.x, this.player.position.y);
-        bullet.beginFill(0Xffff00, 1);
+        bullet.beginFill(0Xffff00, 0);
         bullet.drawCircle(0, 0, this.bulletRadius);
         bullet.endFill();
 

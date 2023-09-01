@@ -21,7 +21,7 @@ class Character {
         this.circle = new PIXI.Graphics();
 
         this.circle.lineStyle(0); // draw a circle, set the lineStyle to zero so the circle doesn't have an outline
-        this.circle.beginFill(0xfff00, 1);
+        this.circle.beginFill(0xfff00, 0);
         this.circle.drawCircle(0, 0, this.player.radius);
         this.circle.endFill();
 

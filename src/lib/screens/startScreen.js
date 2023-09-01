@@ -1,5 +1,6 @@
 import * as PIXI from 'pixi.js';
 import gameScreen from './gameScreen.js';
+import editorScreen from './editorScreen.js';
 
 export default class StartScreen {
 
@@ -33,10 +34,29 @@ export default class StartScreen {
             this.coordinator.gotoScene(new gameScreen(this.coordinator));
         });
 
+
+        // Text button to go to gameplay screen
+        // const gameLevelText = new PIXI.Text('level Editor', {
+        //     fontFamily: 'Roboto Mono',
+        //     fill: 0x000000,
+        //     fontSize: 24
+        // });
+        // gameLevelText.x = window.innerWidth / 2 - gameLevelText.width / 2;
+        // gameLevelText.y = window.innerHeight / 2 - gameLevelText.height / 2 - 200;
+        // // These options make the text clickable
+        // gameLevelText.buttonMode = true;
+        // gameLevelText.interactive = true;
+        // // Go to the gameplay scene when clicked
+        // gameLevelText.on('pointerup', () => {
+        //     this.coordinator.gotoScene(new editorScreen(this.coordinator));
+        // });
+
+
         // Finally we add these elements to the new
         // container provided by the coordinator
         container.addChild(titleText);
         container.addChild(gameplayText);
+        // container.addChild(gameLevelText);
     }
 
     // The menu is static so there's not
